@@ -1,12 +1,48 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { across, blocks, down } from "./constants/words";
 import { TextBlock } from "./components/TextBlock";
 
+const moveFocus = (key, position, setCurrentPosition) => {
+  const [row, col] = position;
+  let newPosition = [...position];
+  console.log(position)
+
+  switch (key) {
+    case "ArrowUp":
+      if (row > 0) newPosition = [row - 1, col];
+      break;
+    case "ArrowDown":
+      if (row < 4) newPosition = [row + 1, col];
+      break;
+    case "ArrowLeft":
+      if (col > 0) newPosition = [row, col - 1];
+      break;
+    case "ArrowRight":
+      if (col < 4) newPosition = [row, col + 1];
+      break;
+
+    case "Backspace":
+      if(key==='Backspace'){
+        if(col>0){
+          newPosition = [row, col - 1];
+          break;
+        }
+      }
+    default:
+      break;
+  }
+
+  // Update the current position
+  setCurrentPosition(newPosition);
+};
+
 function App() {
-  const [count, setCount] = useState(0);
-  // const numbers = Array.from({ length: 25 }, (_, index) => index + 1);
-  // console.log(numbers)
+  const [grid, setGrid] = useState(blocks);
+  const [currentPosition, setCurrentPosition] = useState([0, 0]);
+  // const [currentValue,setCurrentValue]= useState('')
+
+  // console.log(currentValue)
 
   return (
     <>
@@ -31,13 +67,21 @@ function App() {
         <div className="flex-1 flex flex-col border justify-center items-center">
           <div className="square border w-full h-12"></div>
           <div className="square grid grid-cols-5 grid-rows-5 border-4 border-black h-[400px] w-[400px] bg-green-300 ">
-            {blocks.map((x, index) => {
+            {grid.map((x, index) => {
+              const isFocused =
+                x.position[0] === currentPosition[0] &&
+                x.position[1] === currentPosition[1];
               return (
                 <TextBlock
                   num={x.keyNo}
                   letter={x.letter}
                   key={index}
                   empty={x.empty}
+                  position={x.position}
+                  isFocused={isFocused}
+                  onFocus={(key, position) => moveFocus(key, position, setCurrentPosition)}
+                  // currentValue={currentValue}
+                  // setCurrentValue={setCurrentValue}
                 />
               );
             })}
@@ -49,7 +93,7 @@ function App() {
             <p className="across font-semibold py-3 px-2 ">Across</p>
             {across.map((word, index) => {
               return (
-                <div className="py-3 px-2 flex w-full">
+                <div key={index} className="py-3 px-2 flex w-full">
                   <strong>{word.no} </strong>
                   <p key={index} className="pl-2">
                     {word.hints}
@@ -62,7 +106,7 @@ function App() {
             <p className="across font-semibold py-3 px-2 ">Down</p>
             {down.map((word, index) => {
               return (
-                <div className="py-3 px-2 flex w-full ">
+                <div key={index} className="py-3 px-2 flex w-full ">
                   <strong>{word.no} </strong>
                   <p key={index} className="pl-2">
                     {word.hints}
